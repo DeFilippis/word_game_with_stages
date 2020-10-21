@@ -1,0 +1,464 @@
+{% extends 'global/Page.html' %}
+{% load otree %}
+
+{% block title %}
+        Round {{ player.round_number }} of {{ Constants.num_rounds }}: Level 2
+{% endblock %}
+
+{% block content %}
+    <div id="own_tiles_tuple" style="display: none;">{{ tile_value_tuple }}</div>
+    <div class = "current_score" id="current_score"> <h4> Current Score: {{ group.current_score }} points </h4></div>
+    <div class = "cumulative_score" id="cumulative_score"> <h4>Cumulative Score: {{group.cumulative_score}} points</h4></div>
+
+
+    <div class="pop-div">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#instructionsModal">
+            Instructions
+        </button>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style = "width:100%;max-width:900px " role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="instructions">Rules for Round 2</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <p><b>
+                    Overview: It’s just like Stage 1, except now the words you spell have to alternate letters between your tiles and your partner’s tiles.
+                </p></b>
+
+                <li>
+                    In Stage 2, there are 16 rounds. Each round is 4 minutes and 45 seconds. 
+                </li>
+
+
+                <li>
+                    In Stage 2 you have to alternate tiles from your set and tiles from your partner’s set. (It doesn’t matter whose tile goes first)
+                </li>
+                
+                <p></p>
+                <li>
+                    For example, if you have these tiles:
+                </li>
+
+                <img src="https://i.imgur.com/8Kly8m2.png" alt="tile_1" class = "center">
+
+                <li>
+                    And your partner has these tiles:
+                </li>
+
+                <img src="https://i.imgur.com/Qmj81Lg.png" alt="tile_2" class = "center">
+                
+                <li>
+                    You can get points for the word: “TOME” because you have “T”, your partner has “O”, you have “M”, and your partner has “E”. 
+                </li>
+
+                <li>
+                    You CAN’T get points for “TOE” because the “O” and the “E” both come from the same player’s tiles.
+                </li>
+                
+                <li>
+                    Everything else is the same as the last round.
+                </li>
+                
+
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        </div>
+    </div>
+   
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="input-group">
+                <input id="submitted_word" type="text" class="form-control" placeholder="Enter Words Here">
+                <div class="input-group-append">
+                    <button id="submit_button" class="btn btn-primary" type="button">Submit Word</button>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    <table id="history" class="display">
+        <thead>
+            <th>Row_Number</th>
+            <th>Player</th>
+            <th>Word</th>
+            <th>Value</th>
+            <th>Message</th>
+        </thead>
+
+        <tbody>
+            {% for w in group.words.all %}
+            <tr>  
+                <td></td>
+                <td>{{ w.owner.id_in_group }}</td>
+                <td>{{ w.body }}</td>
+                <td>{{ w.value }}</td>
+                <td>{{ w.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="scrabble-container">
+                <div id="own_tiles" name = {{own_tiles}}>{{ own_tiles }}</div>
+            </div>
+        </div>
+                <!--<div id="group_tiles">{{ group_tiles }}</div> -->
+        <div class = "row justify-content-center">
+                <button id = "shuffle_button" class="btn btn-success" type="button">Shuffle Letters</button>
+                <button id="early_leave_vote" class="btn btn-danger" type="button" data-toggle="confirmation"  >Vote to end round early</button>
+
+        </div>
+    </div>
+
+    
+    {% chat %}
+
+{% endblock %}
+
+
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-confirmation2/4.1.0/bootstrap-confirmation.min.js"
+    integrity="sha512-C+jWZdPYFZh3Q8AmgZXnVQZwAv/NtX7IaE13v6ii3CjKRhtEYIwW3/tQlRmqAX4pwNp0xU/UZJBG1KvrrDpZ2A=="
+    crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+
+    <script>
+
+        var history_data_table = $('#history').DataTable({
+            "pageLength": 5,
+            "searching": false,
+            "bLengthChange": false,
+            "language": {
+                "emptyTable": "Words that you discover will appear here."
+            },
+            "order": [[0, "desc"]],
+            "columnDefs": [
+            {
+                targets: [0],
+                visible: false,
+                searchable: false
+            }
+            ]
+        });
+
+        console.log("Ready - R2!");
+        const submitted_word = $('#submitted_word');
+        const submit_button = $('#submit_button');
+        const $group_tiles = $('#group_tiles');
+        const $own_tiles = $('#own_tiles');
+        const $history = $('#history');
+        const $current_score = $('#current_score');
+        const $cumulative_score = $('#cumulative_score');
+        const $early_vote_btn = $('#early_leave_vote');
+        const EARLYBTNTEXT = 'Vote to end round early'; //this is shown if noone else has voted yet
+        const VOTEDALREADYTEXT = 'Click to end round'; //this is shown if a partner has already voted to leave
+        const DISABLED_VOTING = "Please wait..."; // to show on the btn if a user has already voted;
+        const VOTEDALREADY = {{ group.early_leave_vote|json }};
+        const personally_voted = {% if  player.voted_to_leave_early %} true {% else %} false {% endif %};
+
+        let final_btn_text = VOTEDALREADY ? VOTEDALREADYTEXT : EARLYBTNTEXT;
+        final_btn_text = personally_voted ? DISABLED_VOTING : final_btn_text;
+        $early_vote_btn.html(final_btn_text);
+        if (personally_voted) {
+            $early_vote_btn.prop('disabled', true);
+        }
+
+
+        // Style Scrabble Letters and Add Numerical Information
+        transform_letters();
+
+        // Applies CSS to letters to transform them into tiles
+        function get_tile_value(tile){
+            var letter_values = {"A": 1, "B": 3, "C": 3, "D": 2, "E": 1, "F": 4, "G": 2, "H": 4, 
+            "I": 1, "J": 1, "K": 5, "L": 1, "M": 3, "N": 1, "O": 1, "P": 3, "Q": 10, "R": 1, 
+            "S": 1, "T": 1, "U": 1, "V": 4, "W": 4, "X": 8, "Y": 4, "Z": 10}
+            return(letter_values[tile])
+        }
+
+        function transform_letters(){
+            var scrabble_transform = jQuery.map(($own_tiles.html() + '').split(''), function(letter) {
+                return '<span class="scrabble-tile__letter">' + letter + 
+                    '<span class="scrabble-tile__number">' + get_tile_value(letter) + '</span></span>'
+            })
+            //var scrabble_transform = [ ...$('#own_tiles_tuple').text().matchAll(/(\w)',\s+?'(\d)/g)].map(matches => `<span class="scrabble-tile__letter">${matches[1]}<span class="scrabble-tile__number">${matches[2]}</span></span>`);
+            $own_tiles.html(scrabble_transform);
+            return(scrabble_transform)
+        }
+
+        //<span class="scrabble-tile__number">1</span>
+
+        submit_button.click(function () {
+            if (submitted_word.val().trim() !== '') {
+                let payload = {word: submitted_word.val(),}
+                liveSend(payload);
+                $('#submitted_word').val("");
+            }
+
+
+        });
+
+        function liveRecv(word_payload) {
+            const redirectUrl = "{{ view.redirect_url|safe }}";
+
+            const {message_type, message_value, who_voted, rechistory} = word_payload
+            switch (message_type) {
+                case 'error':
+                    alert(message_value)
+                    return;
+                case 'early_leave_vote':
+
+                    console.debug('got a message that a partner voted for leaving round')
+                    if (who_voted === my_own_id_in_group) {
+                        $early_vote_btn.html(DISABLED_VOTING);
+                        $early_vote_btn.prop('disabled', true);
+                    } else {
+                        $early_vote_btn.html(VOTEDALREADYTEXT);
+                    }
+
+                    return;
+                case 'early_leave_confirm':
+                    console.debug('got a confirmation that we are leaving round')
+                    window.location.href = redirectUrl;
+                    return
+                default:
+                    console.debug('new word received')
+            }
+
+            if (rechistory) {
+                wordhistory = rechistory
+            }
+            let text = '<tr style="background-color: #ADD8E6"><td>' + word_payload.id_in_group + '</td><td>' + word_payload.word + '</td><td>' + word_payload.word_value + '</td><td>' + word_payload.message + '</td></tr>';
+            //console.log($("#history").text);
+            //console.log(word_payload.current_score);
+            $current_score.html("<h4>Current Score: " + word_payload.current_score + " points</h4>");
+            $cumulative_score.html("<h4>Cumulative Score: " + word_payload.cumulative_score + " points</h4>");
+
+
+            const how_many = history_data_table.rows().count();
+            //t.row.add([how_many + 1, "whatever" + (how_many + 1).toString()]).draw(false);
+
+            history_data_table.row.add([how_many + 1,
+                word_payload.id_in_group,
+                word_payload.word,
+                word_payload.word_value,
+                word_payload.message]).draw();
+
+
+            //Equivalent to const own_tiles = word_payload.own_tiles
+            const {own_tiles, group_tiles} = word_payload;
+            if (own_tiles) {
+                $own_tiles.html(own_tiles);
+                $own_tiles.attr('name', own_tiles);
+                transform_letters();
+            }
+
+            if (group_tiles) {
+                $group_tiles.html(group_tiles);
+            }
+        }
+
+
+        //Attach listener to form to allow Enter Key to submit a word
+        submitted_word.keypress(function (e) {
+
+        if (e.which == 13) {
+            console.log("Enter Key Pressed");
+            if (!wordhistory.includes($(this).val().toUpperCase())) {
+                $('#submit_button').click();
+                return false;
+            }
+        }
+
+        });
+
+        submitted_word.on('change keydown keyup', function () {
+        if (wordhistory.includes($(this).val().toUpperCase())) {
+            submit_button.prop('disabled', true);
+        } else {
+            submit_button.prop('disabled', false);
+        }
+
+        });
+
+        //Add a shuffle button to randomize order of the string
+        $('#shuffle_button').click(function() {
+            let shuffled = shuffle($('#own_tiles').attr('name').split(''));
+            $own_tiles.html(shuffled);
+            transform_letters(); 
+        });
+
+        //Shuffles an array in place
+        function shuffle(a) {
+            var j, x, i;
+            for (i = a.length - 1; i > 0; i--) {
+                j = Math.floor(Math.random() * (i + 1));
+                x = a[i];
+                a[i] = a[j];
+                a[j] = x;
+            }
+            return a;
+        }
+
+        $('#myModal').on('shown.bs.modal', function () {
+            $('#myInput').trigger('focus')
+        })
+
+
+    </script>
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css"> 
+
+    <style>
+        .row{
+            margin-top: 15px;  
+        }
+
+        .display--inline-block {
+            display: inline-block;
+            float: none; }
+
+        .current_score{
+            position:absolute;
+            top:10px;
+            right: 10px;
+            font-size: large;
+         }
+
+         .cumulative_score{
+            position:absolute;
+            top:40px;
+            right: 10px;
+            font-size: x-large;
+            font-style: italic;
+
+         }
+        .pop-div {
+            position:absolute;
+            top:10px;
+            left: 10px;
+            font-size: large;
+        }
+
+        #shuffle_button {
+            margin-right: 10px;
+        }
+
+        .scrabble-container {
+        clear: both; }
+        @media screen and (min-width: 1024px) {
+            .scrabble-container {
+            margin-left: 15px; } }
+            
+        .scrabble-container .scrabble-tile__space {
+            width: 90px;
+            height: 100px;
+            display: inline-block;
+            background: #D5B292;
+            color: #2A1F1B;
+            border-radius: 4px;
+            font-size: 60px;
+            font-weight: 400;
+            line-height: 100px;
+            margin: 10px 3px;
+            text-align: center;
+            vertical-align: bottom;
+            cursor: default;
+            text-transform: uppercase;
+            box-shadow: 3px 3px 4px rgba(107, 107, 107, 0.8), inset 3px 0 2px rgba(255, 255, 255, 0.4), inset 0 3px 0px rgba(255, 255, 255, 0.5), inset -2px -3px 0px rgba(143, 128, 82, 0.6); }
+        .scrabble-container .scrabble-tile__letter {
+            background: #D5B292 url("../images/scrabble-tile-dark-bg.jpg") no-repeat scroll 0 0;
+            border-radius: 4px;
+            box-shadow: 3px 3px 4px #c8c8c8, 3px 0 2px rgba(213, 178, 146, 0.4) inset, 0 3px 0 rgba(213, 178, 146, 0.5) inset, -3px -4px 0 rgba(107, 107, 107, 0.6) inset;
+            color: #2A1F1B;
+            cursor: default;
+            display: block;
+            float: left;
+            font-family: "Spinnaker", Arial, sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            height: 35px;
+            line-height: 32px;
+            margin: 10px 3px;
+            text-align: center;
+            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.9), 0 -1px 1px rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+            width: 35px; }
+            @media screen and (min-width: 480px) {
+            .scrabble-container .scrabble-tile__letter {
+                width: 31px;
+                height: 31px;
+                line-height: 25px;
+                font-size: 18px; } }
+            @media screen and (min-width: 640px) {
+            .scrabble-container .scrabble-tile__letter {
+                width: 40px;
+                height: 47px;
+                display: inline-block;
+                float: none;
+                font-size: 24px;
+                line-height: 47px; } }
+            @media screen and (min-width: 768px) {
+            .scrabble-container .scrabble-tile__letter {
+                width: 53px;
+                height: 58px;
+                font-size: 30px;
+                line-height: 58px; } }
+
+            .scrabble-tile__number {
+            font-size: 13px;
+            position: relative;
+            right: 0;
+            top: 5px; }
+            @media screen and (min-width: 480px) {
+                .scrabble-tile__number {
+                font-size: 11px; } }
+            @media screen and (min-width: 768px) {
+                .scrabble-tile__number {
+                font-size: 17px;
+                top: 8px; } }
+
+            .scrabble-tile__rotate-nw {
+            transform: rotate(3deg); }
+
+            .scrabble-tile__rotate-ne {
+            transform: rotate(-2deg); }
+
+            .scrabble-tile--end-letter {
+            margin-right: 20px !important; }
+
+            .scrabble-tile--end-letter__mobile-only {
+            margin-right: 20px !important; }
+            @media screen and (min-width: 768px) {
+                .scrabble-tile--end-letter__mobile-only {
+                margin-right: 0 !important; } }
+
+            .scrabble-tile__new-word {
+            clear: both; }
+            @media screen and (min-width: 480px) {
+                .scrabble-tile__new-word {
+                clear: none; } }
+
+            .center {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 50%;
+            }
+
+    </style>
+{% endblock %}
