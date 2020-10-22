@@ -43,7 +43,6 @@
                     In Stage 2 you have to alternate tiles from your set and tiles from your partner’s set. (It doesn’t matter whose tile goes first)
                 </li>
                 
-                <p></p>
                 <li>
                     For example, if you have these tiles:
                 </li>
@@ -288,7 +287,7 @@
 
         });
         submitted_word.on('change keydown keyup', function () {
-            if (wordhistory.includes($(this).val().toUpperCase())) {
+            if (wordhistory.includes($(this).val().toUpperCase()) || $(this).val().length > {% widthratio Constants.tile_size 1 2 %} ) {
                 submit_button.prop('disabled', true);
             } else {
                 submit_button.prop('disabled', false);
@@ -355,6 +354,13 @@
         .display--inline-block {
             display: inline-block;
             float: none;
+        }
+
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
         }
 
         .current_score {

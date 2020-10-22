@@ -1,0 +1,61 @@
+{% extends 'global/Page.html' %}
+{% load otree %}
+
+{% block title %}
+    Instructions for Level 2
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="alert alert-primary" role="alert">
+        <b>Overview: It’s just like Stage 1, except now the words you spell have to alternate letters between your tiles and your partner’s tiles.</b>
+    </div>
+
+
+    <li>
+        In Stage 2, there are 16 rounds. Each round is 4 minutes and 45 seconds. 
+    </li>
+
+    <li>
+        In Stage 2 you have to alternate tiles from your set and tiles from your partner’s set. (It doesn’t matter whose tile goes first)
+    </li>
+
+    <li>
+        For example, if you have these tiles:
+    </li>
+
+    <img src="https://i.imgur.com/8Kly8m2.png" alt="tile_1" class = "center">
+
+    <li>
+        And your partner has these tiles:
+    </li>
+
+    <img src="https://i.imgur.com/Qmj81Lg.png" alt="tile_2" class = "center">
+
+    <li>
+        You can get points for the word: “TOME” because you have “T”, your partner has “O”, you have “M”, and your partner has “E”. 
+    </li>
+
+    <li>
+        You CAN’T get points for “TOE” because the “O” and the “E” both come from the same player’s tiles.
+    </li>
+
+    <li>
+        Everything else is the same as the last round.
+    </li>
+
+    <p></p>
+{% next_button %}
+{% endblock %}
+
+{% block styles %}
+    <style>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+    </style>
+{% endblock %}

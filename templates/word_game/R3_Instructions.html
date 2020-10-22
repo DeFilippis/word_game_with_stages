@@ -1,0 +1,67 @@
+{% extends 'global/Page.html' %}
+{% load otree %}
+
+{% block title %}
+    Instructions for Level 3
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="alert alert-primary" role="alert">
+        <b>Overview: As before, spell the highest-valued word that you can. But this time the tiles come in different colors, and you can’t have two tiles of the same color in a row. (If you don’t see colors well, you can use the tile shapes.)</b>
+    </div>
+    <li> 
+        In Stage 3, there are 16 rounds of 4 minutes and 45 seconds each. 
+    </li>
+    <li> 
+        However, in Stage 3 you can only spell words in which no two consecutive tiles have the same color.
+    </li>
+
+    <li>  
+        If you don't see color well, you can use the shape, because the shape and color of a tile are always consistent. Green tiles are hexagons, red tiles are circles, and blue tiles are squares. 
+    </li>
+
+    <li>
+        For example, if you have these tiles:
+    </li>
+
+    <img src="https://i.imgur.com/OOHXRQG.png" alt="tile_3" class = "center">
+
+    <li>
+        And your partner has these tiles:
+    </li>
+
+    <img src="https://i.imgur.com/pTNNQ5t.png" alt="tile_4" class = "center">
+
+    <li> 
+        You can spell the word: “NEAR”, since the Green "N", the Red "E", a Blue "A", and a Green "R" have no consecutive letters with the same color.
+    </li>
+
+    <li> 
+        You CAN'T spell the word: “WEBS” since that would require a Red “E” and a Red “B”, and you cannot spell a word with two consecutive red tiles. 
+    </li>
+
+    <li> 
+        If there is more than one tile with the same color, you will not be punished, so long as it's possible to make the word without consecutively repeating color tiles. 
+    </li>
+
+    <li>
+        Everything else is the same as the last round.
+    </li>
+
+
+    <p></p>
+{% next_button %}
+{% endblock %}
+
+{% block styles %}
+    <style>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+    </style>
+{% endblock %}

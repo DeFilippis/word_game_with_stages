@@ -31,9 +31,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p><b>
-                        Overview: You and your partner are a team. You each get six letter tiles on each round. Spell the highest-valued word that you can, drawing on both set of tiles. 
-                    </p></b>
+                    <div class="alert alert-primary" role="alert">
+                        <b>Overview: You and your partner are a team. You each get six letter tiles on each round. Spell the highest-valued word that you can, drawing on both set of tiles.</b>
+                    </div>
 
                     <p>
                         <ul>
@@ -301,7 +301,7 @@
 
         });
         submitted_word.on('change keydown keyup', function () {
-            if (wordhistory.includes($(this).val().toUpperCase())) {
+            if (wordhistory.includes($(this).val().toUpperCase()) || $(this).val().length > {% widthratio Constants.tile_size 1 2 %} ) {
                 submit_button.prop('disabled', true);
             } else {
                 submit_button.prop('disabled', false);
@@ -342,18 +342,15 @@
             $('#myInput').trigger('focus')
         })
 
-    </script>
-
-
-
-
-    <script>
-      $('[data-toggle=confirmation]').confirmation({
+        $('[data-toggle=confirmation]').confirmation({
             rootSelector: '[data-toggle=confirmation]',
             onConfirm:()=>{liveSend({end_round: true})}
         });
 
+
     </script>
+
+
 
 {% endblock %}
 
@@ -369,6 +366,7 @@
             display: inline-block;
             float: none;
         }
+
 
         .current_score {
             position: absolute;

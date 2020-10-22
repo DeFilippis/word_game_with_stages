@@ -1,0 +1,65 @@
+{% extends 'global/Page.html' %}
+{% load otree %}
+
+{% block title %}
+    Instructions for Level 1
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="alert alert-primary" role="alert">
+        <b>
+            Overview: You and your partner are a team. You each get six letter tiles on each round. Spell the highest-valued word that you can, drawing on both set of tiles. 
+        </b>
+    </div>
+
+    <ul>
+        <li>
+            In Stage 1, there are 5 rounds. Each round is 4 minutes and 45 seconds. 
+        </li>
+        
+        <li>
+            You and your partner each get six letter tiles. 
+        </li>
+
+        <li>
+            Together, you must enter the highest valued word that you can. Just like in Scrabble, a word’s value is the sum of the numbers on the tiles.
+        </li>
+
+        <li> 
+            Words must include at least one letter from your tiles and one from your partner’s tiles. You won’t be penalized if you both have the same letter.
+        </li>
+
+        <li>
+            You can’t see your partner’s tiles, so use the chatbox to communicate.
+        </li>
+        
+        <li>
+            Both you and your partner can enter words. It doesn’t matter who enters a word.
+        </li>
+        
+        <li> 
+            You can submit as many words as like, but your score for each round is determined ONLY by the highest-valued word you submit. So, try to find the best word!
+        </li>
+        
+        <li> 
+            Be careful! If you submit a word that’s not in the game dictionary or not spelled using tiles that you have (at least one tile from each player) you will lose a point.
+        </li>
+        
+        <li> 
+            If you don’t like your tiles and want to move on to the next round, you can advance if you and partner BOTH hit the “finish round” button.
+        </li>
+        
+        <li>
+            Your running total score in the top right. 
+        </li>
+        
+        <li>
+            At the end of the game, your total score will be divided by 10 and paid out to you in dollars. Your partner will get the same payment.
+        </li>
+    </ul>
+    <p></p>
+
+{% next_button %}
+{% endblock %}

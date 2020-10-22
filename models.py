@@ -8,7 +8,7 @@ from django.db import models as djmodels
 from django.db.models import Sum, Max, Count, Q
 from itertools import cycle
 import copy
-
+import string 
 import yaml
 
 author = 'Evan DeFilippis'
@@ -134,7 +134,16 @@ class Group(TileOwnerMixin, BaseGroup):
                 self.early_leave_vote = True  # do we need it? just to be sure is_displayed condition will be false...
                 self.early_leave_confirm = True
                 return {0: dict(message_type='early_leave_confirm')}
+
         w = data.get('word', '').upper()  # convert word to upper case
+
+        #if submitted word is zero length or greater than tile size
+        if len(w) == 0 or len(w) > Constants.tile_size*2:
+            return
+            
+        #w = w.translate(str.maketrans('', '', string.punctuation)) # strip punctuation
+        #if len(w) == 0: return #catch situations where after removing punctuation the string is blank
+
         if w:
 
             if w in self.history:
@@ -258,16 +267,14 @@ class Word(djmodels.Model):
         current_round = self.owner.round_number
 
         # Phase 1 of the game
-        if current_round >= 1 & current_round < 6:
-            print("WHY IS THIS PRINTING OUTSIDE OF ROUND 6")
+        if current_round >= 1 and current_round < 6:
             return self.counterSubset(self.body, self.owner.group.get_list_of_available_tiles())
 
             #Un-comment if you don't need repeat letters to spell a word
             #return set(self.body).issubset(set(self.owner.group.get_list_of_available_tiles()))
 
         # Phase 2 of the game
-        elif current_round >= 6 & current_round < 22:
-            print("We are currently in Round 22")
+        elif current_round >= 6 and current_round < 22:
 
             p1 = self.owner.get_list_of_available_tiles()
             p2 = self.owner.other.get_list_of_available_tiles()
@@ -300,17 +307,17 @@ class Word(djmodels.Model):
         if not self.exists:
             return 'This word is not in the dictionary'
 
-        if self.owner.round_number >= 1 & self.owner.round_number < 6:
+        if self.owner.round_number >= 1 and self.owner.round_number < 6:
             if self.exists and not self.attainable:
                 return "You do not have the right tiles for this word"
 
-        if self.owner.round_number >= 6 & self.owner.round_number < 22:
+        if self.owner.round_number >= 6 and self.owner.round_number < 22:
             if self.exists and not self.attainable:
                 return "You can't construct this word by alterating tiles across player's hands"
 
         if self.owner.round_number >= 22:
             if self.exists and not self.attainable:
-                return "This word requires using consecutive tiles of the same color"
+                return "You can't construct this word legally with the tiles in your hand"
 
         return "This word is not valid"
 

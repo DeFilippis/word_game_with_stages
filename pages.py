@@ -11,6 +11,9 @@ class MyWaitPage(WaitPage):
 class SecondWP(WaitPage):
     after_all_players_arrive = 'regenerate_tiles'
 
+class InstructionsWP(WaitPage):
+    def is_displayed(self):
+        return self.round_number ==1 or self.round_number ==6 or self.round_number == 22
 
 class Game_Page(Page):
     timeout_seconds = 240 + 45 #4 minutes and 45 seconds
@@ -37,24 +40,41 @@ class Game_Page(Page):
             letter_color_tuple=letter_color_tuple
         )
 
+class R1_Instructions(Page):
+    timeout_seconds = 60*2 
+
+    def is_displayed(self):
+        # display R1 insructions
+        return self.round_number ==1
+
 class Play_Game_R1(Game_Page):
     def is_displayed(self):
         # rounds 1 - 5 should be the "easy" game
         return self.round_number < 6 and not (self.group.early_leave_vote and self.group.early_leave_confirm)
 
+class R2_Instructions(Page):
+    timeout_seconds = 60*2 
 
+    def is_displayed(self):
+        # display R1 insructions
+        return self.round_number == 6
 
 class Play_Game_R2(Game_Page):
     def is_displayed(self):
         # rounds 6 - 21 should be the "medium" difficulty game (16 rounds)
         return self.round_number >= 6 and self.round_number < 22 and not (self.group.early_leave_vote and self.group.early_leave_confirm)
 
+class R3_Instructions(Page):
+    timeout_seconds = 60*2 
 
+    def is_displayed(self):
+        # display R1 insructions
+        return self.round_number == 22
 
 class Play_Game_R3(Game_Page):
     def is_displayed(self):
-        # rounds 22 - 37 should be the "medium" difficulty game (16 rounds)
-        return self.round_number >= 22
+        # rounds 22 - 37 should be the "advanced" difficulty game (16 rounds)
+        return self.round_number >= 22 and not (self.group.early_leave_vote and self.group.early_leave_confirm)
 
 
 
@@ -62,7 +82,13 @@ class Play_Game_R3(Game_Page):
 page_sequence = [
     MyWaitPage,
     SecondWP,
+    R1_Instructions,
+    InstructionsWP,
     Play_Game_R1,
+    R2_Instructions,
+    InstructionsWP,
     Play_Game_R2,
+    R3_Instructions,
+    InstructionsWP,
     Play_Game_R3,
 ]
