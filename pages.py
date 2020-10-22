@@ -57,8 +57,6 @@ class Play_Game_R3(Game_Page):
         return self.round_number >= 22
 
 
-class MyWaitPage(WaitPage):
-    group_by_arrival_time = True
 
 
 page_sequence = [

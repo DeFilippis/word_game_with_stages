@@ -209,6 +209,7 @@ class Word(djmodels.Model):
         return self._body
 
     def validate_word_r2(self, p1, p2):
+        print("We are currently in Round 2")
         w = self.body
         c1 = cycle([p1, p2])
         c2 = cycle([p2, p1])
@@ -255,17 +256,23 @@ class Word(djmodels.Model):
 
     def is_attainable(self):
         current_round = self.owner.round_number
+
         # Phase 1 of the game
         if current_round >= 1 & current_round < 6:
+            print("WHY IS THIS PRINTING OUTSIDE OF ROUND 6")
+            return self.counterSubset(self.body, self.owner.group.get_list_of_available_tiles())
+
             #Un-comment if you don't need repeat letters to spell a word
             #return set(self.body).issubset(set(self.owner.group.get_list_of_available_tiles()))
-            return self.counterSubset(self.body, self.owner.group.get_list_of_available_tiles())
 
         # Phase 2 of the game
         elif current_round >= 6 & current_round < 22:
+            print("We are currently in Round 22")
+
             p1 = self.owner.get_list_of_available_tiles()
             p2 = self.owner.other.get_list_of_available_tiles()
             return self.validate_word_r2(p1, p2)
+
         # Phase 3 of the game
         else:
             p1 = self.owner.get_list_of_available_tiles()
